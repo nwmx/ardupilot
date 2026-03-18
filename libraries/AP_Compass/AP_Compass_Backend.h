@@ -30,6 +30,7 @@
 #endif
 
 #include <AP_Math/AP_Math.h>
+#include <AP_HIL/AP_HIL_config.h>
 
 class Compass;  // forward declaration
 class AP_Compass_Backend
@@ -87,6 +88,10 @@ public:
 
 #if AP_COMPASS_EXTERNALAHRS_ENABLED
     virtual void handle_external(const AP_ExternalAHRS::mag_data_message_t &pkt) {}
+#endif
+
+#if AP_HIL_ENABLED
+    virtual void handle_hil(const Vector3f &field) {}
 #endif
     
 protected:

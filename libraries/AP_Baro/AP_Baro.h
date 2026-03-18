@@ -8,6 +8,7 @@
 #include <Filter/DerivativeFilter.h>
 #include <AP_MSP/msp.h>
 #include <AP_ExternalAHRS/AP_ExternalAHRS.h>
+#include <AP_HIL/AP_HIL_config.h>
 
 // maximum number of sensor instances
 #ifndef BARO_MAX_INSTANCES
@@ -221,6 +222,9 @@ public:
 #endif
 #if AP_BARO_EXTERNALAHRS_ENABLED
     void handle_external(const AP_ExternalAHRS::baro_data_message_t &pkt);
+#endif
+#if AP_HIL_ENABLED
+    void handle_hil(float pressure_hPa, float temperature);
 #endif
 
     enum Options : uint16_t {

@@ -12,6 +12,7 @@
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <AP_MSP/msp.h>
 #include <AP_ExternalAHRS/AP_ExternalAHRS.h>
+#include <AP_HIL/AP_HIL_config.h>
 
 #include "AP_Compass_Backend.h"
 #include "Compass_PerMotor.h"
@@ -356,6 +357,10 @@ public:
     void handle_external(const AP_ExternalAHRS::mag_data_message_t &pkt);
 #endif
 
+#if AP_HIL_ENABLED
+    void handle_hil(const Vector3f &field);
+#endif
+
     // force save of current calibration as valid
     void force_save_calibration(void);
 
@@ -496,6 +501,9 @@ private:
 #endif
 #if AP_COMPASS_LIS2MDL_ENABLED
         DRIVER_LIS2MDL  =23,
+#endif
+#if AP_HIL_ENABLED
+        DRIVER_HIL      =24,
 #endif
 
 };

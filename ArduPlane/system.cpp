@@ -450,7 +450,13 @@ void Plane::startup_INS(void)
     // read Baro pressure at ground
     //-----------------------------
     barometer.set_log_baro_bit(MASK_LOG_IMU);
+#if AP_HIL_ENABLED
+    if (!in_hil_mode()) {
+        barometer.calibrate();
+    }
+#else
     barometer.calibrate();
+#endif
 }
 
 // sets notify object flight mode information

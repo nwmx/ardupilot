@@ -166,6 +166,14 @@ void Plane::ahrs_update()
 {
     arming.update_soft_armed();
 
+#if AP_HIL_ENABLED
+    // in HIL mode, process pending MAVLink messages before AHRS update
+    // so that HIL_SENSOR data is available for the current EKF iteration
+    if (in_hil_mode()) {
+        gcs().update_receive();
+    }
+#endif
+
     ahrs.update();
 
 #if HAL_LOGGING_ENABLED

@@ -46,6 +46,10 @@
 #include "AP_Baro_DroneCAN.h"
 #include "AP_Baro_MSP.h"
 #include "AP_Baro_ExternalAHRS.h"
+#include "AP_Baro_HIL.h"
+#if AP_HIL_ENABLED
+#include <AP_HIL/AP_HIL.h>
+#endif
 #include "AP_Baro_ICP101XX.h"
 #include "AP_Baro_ICP201XX.h"
 #include "AP_Baro_AUAV.h"
@@ -645,6 +649,16 @@ void AP_Baro::init(void)
     }
 #endif
 
+#if AP_HIL_ENABLED
+    {
+        auto *hil = AP::hil();
+        if (hil != nullptr && hil->enabled()) {
+            _add_backend(NEW_NOTHROW AP_Baro_HIL(*this));
+            return;
+        }
+    }
+#endif
+
 #if AP_BARO_EXTERNALAHRS_ENABLED
     const int8_t serial_port = AP::externalAHRS().get_port(AP_ExternalAHRS::AvailableSensor::BARO);
     if (serial_port >= 0) {
@@ -1115,6 +1129,15 @@ void AP_Baro::handle_external(const AP_ExternalAHRS::baro_data_message_t &pkt)
     }
 }
 #endif  // AP_BARO_EXTERNALAHRS_ENABLED
+
+#if AP_HIL_ENABLED
+void AP_Baro::handle_hil(float pressure_hPa, float temperature)
+{
+    for (uint8_t i=0; i<_num_drivers; i++) {
+        drivers[i]->handle_hil(pressure_hPa, temperature);
+    }
+}
+#endif  // AP_HIL_ENABLED
 
 // returns false if we fail arming checks, in which case the buffer will be populated with a failure message
 bool AP_Baro::arming_checks(size_t buflen, char *buffer) const

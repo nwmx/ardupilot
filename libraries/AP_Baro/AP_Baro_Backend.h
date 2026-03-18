@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AP_Baro.h"
+#include <AP_HIL/AP_HIL_config.h>
 
 class AP_Baro_Backend
 {
@@ -25,6 +26,10 @@ public:
 
 #if AP_BARO_EXTERNALAHRS_ENABLED
     virtual void handle_external(const AP_ExternalAHRS::baro_data_message_t &pkt) {}
+#endif
+
+#if AP_HIL_ENABLED
+    virtual void handle_hil(float pressure_hPa, float temperature) {}
 #endif
 
     /*

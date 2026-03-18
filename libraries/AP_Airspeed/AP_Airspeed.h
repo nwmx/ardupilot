@@ -6,6 +6,7 @@
 
 #include <AP_Param/AP_Param.h>
 #include <AP_Math/AP_Math.h>
+#include <AP_HIL/AP_HIL_config.h>
 
 #if AP_AIRSPEED_MSP_ENABLED
 #include <AP_MSP/msp.h>
@@ -233,6 +234,9 @@ public:
 #if AP_AIRSPEED_SITL_ENABLED
         TYPE_SITL=100,
 #endif  // AP_AIRSPEED_SITL_ENABLED
+#if AP_HIL_ENABLED
+        TYPE_HIL=101,
+#endif  // AP_HIL_ENABLED
     };
 
     // get current primary sensor

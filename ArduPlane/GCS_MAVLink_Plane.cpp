@@ -1418,16 +1418,16 @@ uint8_t GCS_MAVLINK_Plane::send_available_mode(uint8_t index) const
 
 #if AP_HIL_ENABLED
 /*
-  handle a HIL_SENSOR MAVLink message — dispatches IMU data to the
-  AP_InertialSensor frontend which forwards to the HIL backend.
-  Baro/compass/airspeed dispatch will be added in Phase D.
+  handle a HIL_SENSOR MAVLink message — dispatches sensor data to the
+  appropriate frontend classes which forward to their HIL backends.
+  Airspeed HIL backend reads directly from AP_HIL singleton.
 */
 void GCS_MAVLINK_Plane::handle_hil_sensor(const mavlink_message_t &msg)
 {
     mavlink_hil_sensor_t pkt;
     mavlink_msg_hil_sensor_decode(&msg, &pkt);
 
-    // store in AP_HIL singleton for other backends to use later
+    // store in AP_HIL singleton (airspeed backend reads from here)
     auto *hil = AP::hil();
     if (hil == nullptr) {
         return;
@@ -1442,11 +1442,20 @@ void GCS_MAVLINK_Plane::handle_hil_sensor(const mavlink_message_t &msg)
     hil->sensor.fields_updated = pkt.fields_updated;
     hil->sensor.updated = true;
 
-    // dispatch IMU data to INS backends
+    // dispatch IMU data (accel + gyro)
     AP::ins().handle_hil(
         hil->sensor.accel,
         hil->sensor.gyro,
         hil->sensor.temperature
     );
+
+    // dispatch barometer data (abs_pressure in hPa, temperature in °C)
+    AP::baro().handle_hil(pkt.abs_pressure, pkt.temperature);
+
+    // dispatch magnetometer data (field in Gauss)
+    AP::compass().handle_hil(hil->sensor.mag);
+
+    // airspeed: no dispatch needed — AP_Airspeed_HIL reads diff_pressure
+    // directly from the AP_HIL singleton in get_differential_pressure()
 }
 #endif // AP_HIL_ENABLED

@@ -55,6 +55,7 @@
 #include "AP_Airspeed_AUAV.h"
 #include "AP_Airspeed_External.h"
 #include "AP_Airspeed_SITL.h"
+#include "AP_Airspeed_HIL.h"
 extern const AP_HAL::HAL &hal;
 
 #include <AP_Vehicle/AP_FixedWing.h>
@@ -395,6 +396,11 @@ void AP_Airspeed::allocate()
             sensor[i] = NEW_NOTHROW AP_Airspeed_SITL(*this, i);
             break;
 #endif  // AP_AIRSPEED_SITL_ENABLED
+#if AP_HIL_ENABLED
+        case TYPE_HIL:
+            sensor[i] = NEW_NOTHROW AP_Airspeed_HIL(*this, i);
+            break;
+#endif  // AP_HIL_ENABLED
 #if AP_AIRSPEED_ANALOG_ENABLED
         case TYPE_ANALOG:
             sensor[i] = NEW_NOTHROW AP_Airspeed_Analog(*this, i);

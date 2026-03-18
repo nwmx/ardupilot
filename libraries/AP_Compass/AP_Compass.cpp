@@ -47,6 +47,10 @@
 #if AP_COMPASS_EXTERNALAHRS_ENABLED
 #include "AP_Compass_ExternalAHRS.h"
 #endif
+#if AP_HIL_ENABLED
+#include "AP_Compass_HIL.h"
+#include <AP_HIL/AP_HIL.h>
+#endif
 #include "AP_Compass.h"
 #include "Compass_learn.h"
 #include <stdio.h>
@@ -1400,6 +1404,16 @@ void Compass::_probe_external_i2c_compasses(void)
  */
 void Compass::_detect_backends(void)
 {
+#if AP_HIL_ENABLED
+    {
+        auto *hil = AP::hil();
+        if (hil != nullptr && hil->enabled()) {
+            add_backend(DRIVER_HIL, AP_Compass_HIL::probe());
+            return;
+        }
+    }
+#endif
+
 #if AP_COMPASS_EXTERNALAHRS_ENABLED
     const int8_t serial_port = AP::externalAHRS().get_port(AP_ExternalAHRS::AvailableSensor::COMPASS);
     if (serial_port >= 0) {
@@ -2327,6 +2341,15 @@ void Compass::handle_external(const AP_ExternalAHRS::mag_data_message_t &pkt)
     }
 }
 #endif // AP_COMPASS_EXTERNALAHRS_ENABLED
+
+#if AP_HIL_ENABLED
+void Compass::handle_hil(const Vector3f &field)
+{
+    for (uint8_t i=0; i<_backend_count; i++) {
+        _backends[i]->handle_hil(field);
+    }
+}
+#endif // AP_HIL_ENABLED
 
 // force save of current calibration as valid
 void Compass::force_save_calibration(void)
