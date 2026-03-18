@@ -3,6 +3,7 @@
 #include <GCS_MAVLink/GCS.h>
 #include <AP_Logger/AP_Logger.h>
 #include <AP_Airspeed/AP_Airspeed_config.h>
+#include <AP_HIL/AP_HIL_config.h>
 #include "quadplane.h"
 #include "defines.h"
 
@@ -67,6 +68,10 @@ private:
     void handle_set_position_target_global_int(const mavlink_message_t &msg);
     void handle_set_position_target_local_ned(const mavlink_message_t &msg);
     void handle_set_attitude_target(const mavlink_message_t &msg);
+
+#if AP_HIL_ENABLED
+    void handle_hil_sensor(const mavlink_message_t &msg);
+#endif
 
 #if HAL_QUADPLANE_ENABLED
 #if AP_MAVLINK_COMMAND_LONG_ENABLED

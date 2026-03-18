@@ -37,10 +37,15 @@ public:
 
     AP_HIL();
 
+    // called by Plane during init to set mode from HIL_MODE parameter
+    void set_enabled(bool en) { _enabled = en; }
+    bool enabled() const { return _enabled; }
+
     sensor_data_t sensor;
 
 private:
     static AP_HIL *_singleton;
+    bool _enabled;
 };
 
 namespace AP {

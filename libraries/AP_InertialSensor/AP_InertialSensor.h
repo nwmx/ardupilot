@@ -15,6 +15,7 @@
 #include <AP_HAL/utility/RingBuffer.h>
 #include <AP_Math/AP_Math.h>
 #include <AP_ExternalAHRS/AP_ExternalAHRS.h>
+#include <AP_HIL/AP_HIL_config.h>
 #include <Filter/LowPassFilter.h>
 #include <Filter/HarmonicNotchFilter.h>
 #include <AP_SerialManager/AP_SerialManager_config.h>
@@ -429,6 +430,11 @@ public:
 #if AP_EXTERNAL_AHRS_ENABLED
     // handle external AHRS data
     void handle_external(const AP_ExternalAHRS::ins_data_message_t &pkt);
+#endif
+
+#if AP_HIL_ENABLED
+    // handle HIL sensor data
+    void handle_hil(const Vector3f &accel, const Vector3f &gyro, float temperature);
 #endif
 
 #if HAL_INS_TEMPERATURE_CAL_ENABLE

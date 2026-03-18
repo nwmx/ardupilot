@@ -34,6 +34,10 @@ void Plane::init_ardupilot()
 
     init_rc_out_main();
 
+#if AP_HIL_ENABLED
+    hil_sim.set_enabled(g.hil_mode == 1);
+#endif
+
     // init baro
     barometer.init();
 

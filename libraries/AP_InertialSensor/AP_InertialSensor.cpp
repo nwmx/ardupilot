@@ -35,6 +35,10 @@
 #include "AP_InertialSensor_Invensensev2.h"
 #include "AP_InertialSensor_ADIS1647x.h"
 #include "AP_InertialSensor_ExternalAHRS.h"
+#include "AP_InertialSensor_HIL.h"
+#if AP_HIL_ENABLED
+#include <AP_HIL/AP_HIL.h>
+#endif
 #include "AP_InertialSensor_Invensensev3.h"
 #include "AP_InertialSensor_NONE.h"
 #include "AP_InertialSensor_SCHA63T.h"
@@ -1198,6 +1202,16 @@ AP_InertialSensor::detect_backends(void)
 
 // macro for use by HAL_INS_PROBE_LIST
 #define GET_I2C_DEVICE(bus, address) hal.i2c_mgr->get_device(bus, address)
+
+#if AP_HIL_ENABLED
+    {
+        auto *hil = AP::hil();
+        if (hil != nullptr && hil->enabled()) {
+            ADD_BACKEND(NEW_NOTHROW AP_InertialSensor_HIL(*this));
+            return;
+        }
+    }
+#endif
 
 #if AP_EXTERNAL_AHRS_ENABLED
     // if enabled, make the first IMU the external AHRS
@@ -2799,6 +2813,15 @@ void AP_InertialSensor::handle_external(const AP_ExternalAHRS::ins_data_message_
     }
 }
 #endif // AP_EXTERNAL_AHRS_ENABLED
+
+#if AP_HIL_ENABLED
+void AP_InertialSensor::handle_hil(const Vector3f &accel, const Vector3f &gyro, float temperature)
+{
+    for (uint8_t i = 0; i < _backend_count; i++) {
+        _backends[i]->handle_hil(accel, gyro, temperature);
+    }
+}
+#endif // AP_HIL_ENABLED
 
 // force save of current calibration as valid
 void AP_InertialSensor::force_save_calibration(void)

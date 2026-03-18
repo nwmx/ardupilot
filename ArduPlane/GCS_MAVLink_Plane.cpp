@@ -1028,6 +1028,14 @@ void GCS_MAVLINK_Plane::handle_message(const mavlink_message_t &msg)
         handle_set_position_target_global_int(msg);
         break;
 
+#if AP_HIL_ENABLED
+    case MAVLINK_MSG_ID_HIL_SENSOR:
+        if (plane.in_hil_mode()) {
+            handle_hil_sensor(msg);
+        }
+        break;
+#endif
+
     default:
         GCS_MAVLINK::handle_message(msg);
         break;
@@ -1407,3 +1415,38 @@ uint8_t GCS_MAVLINK_Plane::send_available_mode(uint8_t index) const
 
     return mode_count;
 }
+
+#if AP_HIL_ENABLED
+/*
+  handle a HIL_SENSOR MAVLink message — dispatches IMU data to the
+  AP_InertialSensor frontend which forwards to the HIL backend.
+  Baro/compass/airspeed dispatch will be added in Phase D.
+*/
+void GCS_MAVLINK_Plane::handle_hil_sensor(const mavlink_message_t &msg)
+{
+    mavlink_hil_sensor_t pkt;
+    mavlink_msg_hil_sensor_decode(&msg, &pkt);
+
+    // store in AP_HIL singleton for other backends to use later
+    auto *hil = AP::hil();
+    if (hil == nullptr) {
+        return;
+    }
+    hil->sensor.accel = {pkt.xacc, pkt.yacc, pkt.zacc};
+    hil->sensor.gyro = {pkt.xgyro, pkt.ygyro, pkt.zgyro};
+    hil->sensor.mag = {pkt.xmag, pkt.ymag, pkt.zmag};
+    hil->sensor.abs_pressure = pkt.abs_pressure;
+    hil->sensor.diff_pressure = pkt.diff_pressure;
+    hil->sensor.pressure_alt = pkt.pressure_alt;
+    hil->sensor.temperature = pkt.temperature;
+    hil->sensor.fields_updated = pkt.fields_updated;
+    hil->sensor.updated = true;
+
+    // dispatch IMU data to INS backends
+    AP::ins().handle_hil(
+        hil->sensor.accel,
+        hil->sensor.gyro,
+        hil->sensor.temperature
+    );
+}
+#endif // AP_HIL_ENABLED

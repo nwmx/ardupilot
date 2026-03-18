@@ -26,6 +26,7 @@
 
 #include <AP_Math/AP_Math.h>
 #include <AP_ExternalAHRS/AP_ExternalAHRS.h>
+#include <AP_HIL/AP_HIL_config.h>
 
 #include "AP_InertialSensor.h"
 
@@ -94,6 +95,10 @@ public:
     virtual void handle_external(const AP_ExternalAHRS::ins_data_message_t &pkt) {}
 #endif
 
+#if AP_HIL_ENABLED
+    virtual void handle_hil(const Vector3f &accel, const Vector3f &gyro, float temperature) {}
+#endif
+
 #if AP_INERTIALSENSOR_KILL_IMU_ENABLED
     bool has_been_killed(uint8_t instance) const { return ((1U<<instance) & _imu.imu_kill_mask); }
 #else
@@ -152,6 +157,7 @@ public:
         DEVTYPE_INS_ICM45686 = 0x3B,
         DEVTYPE_INS_SCHA63T  = 0x3C,
         DEVTYPE_INS_IIM42653 = 0x3D,
+        DEVTYPE_INS_HIL      = 0x3E,
     };
 
 protected:
