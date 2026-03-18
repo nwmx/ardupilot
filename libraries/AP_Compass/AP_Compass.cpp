@@ -1409,7 +1409,9 @@ void Compass::_detect_backends(void)
         auto *hil = AP::hil();
         if (hil != nullptr && hil->enabled()) {
             add_backend(DRIVER_HIL, AP_Compass_HIL::probe());
+#if CONFIG_HAL_BOARD != HAL_BOARD_SITL
             return;
+#endif
         }
     }
 #endif

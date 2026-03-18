@@ -1208,7 +1208,9 @@ AP_InertialSensor::detect_backends(void)
         auto *hil = AP::hil();
         if (hil != nullptr && hil->enabled()) {
             ADD_BACKEND(NEW_NOTHROW AP_InertialSensor_HIL(*this));
+#if CONFIG_HAL_BOARD != HAL_BOARD_SITL
             return;
+#endif
         }
     }
 #endif
