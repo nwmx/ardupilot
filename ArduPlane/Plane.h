@@ -104,6 +104,11 @@
 // Configuration
 #include "config.h"
 
+#include <AP_HIL/AP_HIL_config.h>
+#if AP_HIL_ENABLED
+#include <AP_HIL/AP_HIL.h>
+#endif
+
 #if AP_ADVANCEDFAILSAFE_ENABLED
 #include "afs_plane.h"
 #endif
@@ -189,6 +194,15 @@ public:
 
     Plane(void);
 
+    // returns true if HIL simulation mode is enabled
+    bool in_hil_mode() const {
+#if AP_HIL_ENABLED
+        return g.hil_mode == 1;
+#else
+        return false;
+#endif
+    }
+
 private:
 
     // key aircraft parameters passed to multiple libraries
@@ -197,6 +211,10 @@ private:
     // Global parameters are all contained within the 'g' and 'g2' classes.
     Parameters g;
     ParametersG2 g2;
+
+#if AP_HIL_ENABLED
+    AP_HIL hil_sim;
+#endif
 
     // mapping between input channels
     RCMapper rcmap;

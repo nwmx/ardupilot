@@ -987,6 +987,15 @@ const AP_Param::Info Plane::var_info[] = {
     GOBJECT(_gcs,           "MAV",  GCS),
 #endif
 
+#if AP_HIL_ENABLED
+    // @Param: HIL_MODE
+    // @DisplayName: Hardware-in-the-Loop mode
+    // @Description: Enable HIL simulation mode. When set to 1, sensor data is accepted from HIL_SENSOR MAVLink messages instead of real hardware sensors.
+    // @Values: 0:Disabled,1:Enabled
+    // @User: Advanced
+    GSCALAR(hil_mode, "HIL_MODE", 0),
+#endif
+
     AP_VAREND
 };
 
