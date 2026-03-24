@@ -1207,10 +1207,12 @@ AP_InertialSensor::detect_backends(void)
     {
         auto *hil = AP::hil();
         if (hil != nullptr && hil->enabled()) {
+            // Register HIL backend first (becomes IMU index 0, used by EKF primary).
+            // Fall through to also register real hardware / SITL backends — they
+            // provide the scheduler timing (hardware interrupts / SITL clock) that
+            // the HIL backend alone cannot supply.  Use EK3_IMU_MASK=1 to restrict
+            // EKF instances to IMU 0 (HIL data only).
             ADD_BACKEND(NEW_NOTHROW AP_InertialSensor_HIL(*this));
-#if CONFIG_HAL_BOARD != HAL_BOARD_SITL
-            return;
-#endif
         }
     }
 #endif

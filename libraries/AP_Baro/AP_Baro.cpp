@@ -1170,6 +1170,18 @@ bool AP_Baro::arming_checks(size_t buflen, char *buffer) const
     return true;
 }
 
+// Stub to satisfy linker — SimpleUnderWaterAtmosphere is declared in AP_Baro.h
+// and called from SITL SIM_SerialRangeFinder (submarine sonar sim), but the
+// implementation was not committed upstream (as of early 2025). For ArduPlane
+// this path is never reached at runtime; we need the symbol to link.
+// ISA sea-level ratios: rho=delta=theta=1.0
+void AP_Baro::SimpleUnderWaterAtmosphere(float /*alt*/, float &rho, float &delta, float &theta)
+{
+    rho   = 1.0f;
+    delta = 1.0f;
+    theta = 1.0f;
+}
+
 namespace AP {
 
 AP_Baro &baro()
@@ -1178,23 +1190,3 @@ AP_Baro &baro()
 }
 
 };
-
-/*
-  Simple underwater atmosphere model.
-  alt is depth in metres (positive down).
-  Returns density ratio (rho), pressure ratio (delta), temperature ratio (theta)
-  relative to sea-level standard values.
-  This is a stub to unblock SITL linking — upstream declaration has no implementation.
-*/
-void AP_Baro::SimpleUnderWaterAtmosphere(float alt, float &rho, float &delta, float &theta)
-{
-    // water density ~1000 kg/m³, g = 9.80665 m/s²
-    const float water_density = 1000.0f;
-    const float depth = (alt > 0) ? alt : 0;  // depth positive down
-    const float pressure = SSL_AIR_PRESSURE + water_density * GRAVITY_MSS * depth;
-    delta = pressure / SSL_AIR_PRESSURE;
-    // temperature approximately constant underwater
-    theta = 1.0f;
-    // density ratio — water is ~815x denser than air at SSL
-    rho = delta;  // simplified
-}

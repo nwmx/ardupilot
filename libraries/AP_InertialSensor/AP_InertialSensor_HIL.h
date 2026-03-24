@@ -21,6 +21,7 @@ public:
 
 private:
     bool started;
+    bool hil_data_received;  // true once first HIL_SENSOR has arrived
 };
 
 #endif // AP_HIL_ENABLED

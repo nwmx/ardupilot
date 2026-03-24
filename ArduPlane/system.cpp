@@ -9,7 +9,6 @@ static void failsafe_check_static()
 
 void Plane::init_ardupilot()
 {
-
     ins.set_log_raw_bit(MASK_LOG_IMU_RAW);
 
     rollController.convert_pid();
